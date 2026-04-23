@@ -6,75 +6,136 @@
 //
 
 import SwiftUI
-import SwiftData
+import WebKit
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    private let wikiURL = URL(string:
+        "https://github.com/fluhartyml/Claudes-Xcode-26-Swift-Bible/wiki")!
+
+    @State private var webView = WKWebView()
+    @State private var showAbout = false
+    @State private var showUnderTheHood = false
 
     var body: some View {
-        NavigationViewWrapper {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        NavigationView {
+            WebViewRepresentable(webView: webView)
+                .ignoresSafeArea(edges: .bottom)
+                .onAppear {
+                    if webView.url == nil {
+                        webView.load(URLRequest(url: wikiURL))
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                .navigationTitle("Swift Bible Wiki")
+                #if os(iOS) || os(visionOS)
+                .navigationBarTitleDisplayMode(.inline)
+                #endif
+                .toolbar {
+                    #if os(iOS) || os(visionOS)
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            webView.goBack()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                        }
+                        .disabled(!webView.canGoBack)
                     }
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            webView.goForward()
+                        } label: {
+                            Image(systemName: "chevron.right")
+                        }
+                        .disabled(!webView.canGoForward)
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button {
+                                webView.load(URLRequest(url: wikiURL))
+                            } label: {
+                                Label("Home (Wiki)", systemImage: "house")
+                            }
+                            Button {
+                                webView.reload()
+                            } label: {
+                                Label("Reload", systemImage: "arrow.clockwise")
+                            }
+                            Divider()
+                            Button {
+                                showUnderTheHood = true
+                            } label: {
+                                Label("Under the Hood",
+                                      systemImage: "wrench.and.screwdriver")
+                            }
+                            Button {
+                                showAbout = true
+                            } label: {
+                                Label("About", systemImage: "info.circle")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                    }
+                    #else
+                    ToolbarItem(placement: .navigation) {
+                        Button {
+                            webView.goBack()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                        }
+                        .disabled(!webView.canGoBack)
+                    }
+                    ToolbarItem(placement: .navigation) {
+                        Button {
+                            webView.goForward()
+                        } label: {
+                            Image(systemName: "chevron.right")
+                        }
+                        .disabled(!webView.canGoForward)
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            webView.load(URLRequest(url: wikiURL))
+                        } label: {
+                            Label("Home", systemImage: "house")
+                        }
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            webView.reload()
+                        } label: {
+                            Label("Reload", systemImage: "arrow.clockwise")
+                        }
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showUnderTheHood = true
+                        } label: {
+                            Label("Under the Hood",
+                                  systemImage: "wrench.and.screwdriver")
+                        }
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showAbout = true
+                        } label: {
+                            Label("About", systemImage: "info.circle")
+                        }
+                    }
+                    #endif
                 }
-            }
+                .sheet(isPresented: $showAbout) {
+                    AboutView()
+                }
+                .sheet(isPresented: $showUnderTheHood) {
+                    UnderTheHoodView()
+                }
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
-}
-
-fileprivate struct NavigationViewWrapper<Content: View>: View {
-    let content: () -> Content
-
-    var body: some View {
-#if os(macOS)
-        NavigationSplitView {
-            content()
-        } detail: {
-            Text("Select an item")
-        }
-#else
-        content()
-#endif
+        #if os(iOS) || os(visionOS)
+        .navigationViewStyle(.stack)
+        #endif
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
