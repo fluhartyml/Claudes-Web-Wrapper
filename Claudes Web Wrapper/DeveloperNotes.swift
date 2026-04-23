@@ -13,7 +13,7 @@ import Foundation
 
 enum DeveloperNotes {
     static let mission = """
-    Claude's Web Wrapper is the first build-along app in Claude's Xcode 26 Swift Bible.
+    Claude's Web Wrapper is the first build-along app in Claude's X26 Swift6 book.
     It wraps the book's GitHub Wiki so readers can browse all 22 Books, the Lexicon, \
     the Index, and the Bibliography inside a native app instead of a browser tab. \
     The app is deliberately narrow in scope: one destination, one WKWebView, \

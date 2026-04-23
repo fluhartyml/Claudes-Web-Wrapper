@@ -25,7 +25,7 @@ struct ContentView: View {
                         webView.load(URLRequest(url: wikiURL))
                     }
                 }
-                .navigationTitle("Swift Bible Wiki")
+                .navigationTitle("X26 Swift6 Wiki")
                 #if os(iOS) || os(visionOS)
                 .navigationBarTitleDisplayMode(.inline)
                 #endif

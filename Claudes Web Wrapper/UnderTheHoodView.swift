@@ -184,7 +184,7 @@ struct SourceFile: Identifiable {
 
             struct ContentView: View {
                 private let wikiURL = URL(string:
-                    "https://github.com/fluhartyml/Claudes-Xcode-26-Swift-Bible/wiki")!
+                    "https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki")!
 
                 @State private var webView = WKWebView()
                 @State private var showAbout = false

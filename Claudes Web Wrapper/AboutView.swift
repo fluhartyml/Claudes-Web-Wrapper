@@ -32,7 +32,7 @@ struct AboutView: View {
                 }
 
                 Section("About This App") {
-                    Text("A single-destination wrapper for the Claude Xcode 26 Swift Bible GitHub Wiki. Built as the first build-along app in the book.")
+                    Text("A single-destination wrapper for Claude's X26 Swift6 GitHub Wiki. Built as the first build-along app in the book.")
                         .font(.body)
                 }
 
