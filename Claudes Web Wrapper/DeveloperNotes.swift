@@ -54,7 +54,7 @@ enum DeveloperNotes {
     """
 
     static let wrappedDestination = """
-    https://github.com/fluhartyml/Claudes-Xcode-26-Swift-Bible/wiki
+    https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki
 
     The GitHub-hosted wiki of the book. Loaded at launch. Readers can tap any \
     link inside the wiki to navigate between Books, Chapters, Lexicon entries, \
