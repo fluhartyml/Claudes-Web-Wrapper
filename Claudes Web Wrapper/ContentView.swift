@@ -51,46 +51,42 @@ struct ContentView: View {
                         }
                         .disabled(!webView.canGoForward)
                     }
-                    ToolbarItem(placement: .topBarTrailing) {
+
+                    ToolbarItemGroup(placement: .bottomBar) {
                         Button {
                             saveBookmark()
                         } label: {
-                            Image(systemName: "star")
+                            Label("Save", systemImage: "star")
                         }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
+                        Spacer()
                         Button {
                             showBookmarks = true
                         } label: {
-                            Image(systemName: "book")
+                            Label("Bookmarks", systemImage: "book")
                         }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button {
-                                webView.load(URLRequest(url: wikiURL))
-                            } label: {
-                                Label("Contents", systemImage: "list.bullet")
-                            }
-                            Button {
-                                webView.reload()
-                            } label: {
-                                Label("Reload", systemImage: "arrow.clockwise")
-                            }
-                            Divider()
-                            Button {
-                                showUnderTheHood = true
-                            } label: {
-                                Label("Under the Hood",
-                                      systemImage: "wrench.and.screwdriver")
-                            }
-                            Button {
-                                showAbout = true
-                            } label: {
-                                Label("About", systemImage: "info.circle")
-                            }
+                        Spacer()
+                        Button {
+                            webView.load(URLRequest(url: wikiURL))
                         } label: {
-                            Image(systemName: "ellipsis.circle")
+                            Label("Contents", systemImage: "list.bullet")
+                        }
+                        Spacer()
+                        Button {
+                            webView.reload()
+                        } label: {
+                            Label("Reload", systemImage: "arrow.clockwise")
+                        }
+                        Spacer()
+                        Button {
+                            showUnderTheHood = true
+                        } label: {
+                            Label("Under the Hood", systemImage: "car.fill")
+                        }
+                        Spacer()
+                        Button {
+                            showAbout = true
+                        } label: {
+                            Label("About", systemImage: "info.circle")
                         }
                     }
                     #else
@@ -142,8 +138,7 @@ struct ContentView: View {
                         Button {
                             showUnderTheHood = true
                         } label: {
-                            Label("Under the Hood",
-                                  systemImage: "wrench.and.screwdriver")
+                            Label("Under the Hood", systemImage: "car.fill")
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
