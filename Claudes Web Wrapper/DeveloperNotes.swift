@@ -69,11 +69,14 @@ enum DeveloperNotes {
     """
 
     static let wrappedDestination = """
-    https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki
+    https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki/Claudes-X26-Swift6-Bible
 
-    The GitHub-hosted wiki of the book. Loaded at launch. Readers can tap any \
-    link inside the wiki to navigate between Books, Chapters, Lexicon entries, \
-    and Appendices without leaving the app (one-stop-shop principle).
+    The book wiki's table-of-contents page — loaded at launch. Readers land \
+    on the menu of every Book, Lexicon section, Build-Along, and Appendix, \
+    and tap into whichever chapter they want to read. The wiki Home page \
+    (intro / orientation) remains one tap away via the wiki's own sidebar. \
+    Every link inside the wiki navigates within the same WKWebView \
+    (one-stop-shop principle).
     """
 
     static let versionHistory = """

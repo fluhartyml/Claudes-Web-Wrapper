@@ -136,11 +136,12 @@ struct Claudes_Web_WrapperApp: App {
 //
 
 import SwiftUI
+import SwiftData
 import WebKit
 
 struct ContentView: View {
     private let wikiURL = URL(string:
-        "https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki")!
+        "https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki/Claudes-X26-Swift6-Bible")!
 
     @State private var webView = WKWebView()
     @State private var showAbout = false

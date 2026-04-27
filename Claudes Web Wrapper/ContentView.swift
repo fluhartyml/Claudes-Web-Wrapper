@@ -11,7 +11,7 @@ import WebKit
 
 struct ContentView: View {
     private let wikiURL = URL(string:
-        "https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki")!
+        "https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki/Claudes-X26-Swift6-Bible")!
 
     @Environment(\.modelContext) private var modelContext
     @State private var webView = WKWebView()
@@ -70,7 +70,7 @@ struct ContentView: View {
                             Button {
                                 webView.load(URLRequest(url: wikiURL))
                             } label: {
-                                Label("Home (Wiki)", systemImage: "house")
+                                Label("Contents", systemImage: "list.bullet")
                             }
                             Button {
                                 webView.reload()
@@ -128,7 +128,7 @@ struct ContentView: View {
                         Button {
                             webView.load(URLRequest(url: wikiURL))
                         } label: {
-                            Label("Home", systemImage: "house")
+                            Label("Contents", systemImage: "list.bullet")
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {

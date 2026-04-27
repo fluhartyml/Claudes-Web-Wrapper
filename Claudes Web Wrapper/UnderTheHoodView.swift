@@ -38,7 +38,7 @@ struct UnderTheHoodView: View {
     private var list: some View {
         List {
             Section {
-                Text("Each file in this app carries an Under the Hood callout — a developer-audience note explaining the design choice. Tap a row to read the callout, see the source, and jump to the live file on GitHub.")
+                Text("Tap a file to read why the code is written that way, browse the source, and jump to the live file on GitHub.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
