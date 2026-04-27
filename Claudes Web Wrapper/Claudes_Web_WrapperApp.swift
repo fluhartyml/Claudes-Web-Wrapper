@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Claudes_Web_WrapperApp: App {
@@ -13,5 +14,6 @@ struct Claudes_Web_WrapperApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Bookmark.self)
     }
 }

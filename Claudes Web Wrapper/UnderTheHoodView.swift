@@ -4,313 +4,210 @@
 //
 //  Created by Michael Fluharty on 4/23/26.
 //
-//  Surfaces the app's source, architecture, and developer notes inside the
-//  app itself so curious readers can study the implementation without opening
-//  Xcode. Mirrors the book's "Under the Hood" convention for every
-//  Claude Xcode 26 Swift Bible build-along.
+//  ── Under the Hood ──────────────────────────────────────────────
+//  This view IS the Under the Hood feature — a list of the app's
+//  own source files plus each file's UTH callout block (the comment
+//  header you're reading right now), surfaced in-app. Tap a row,
+//  read the callout, scroll the source, jump to the live file on
+//  GitHub. The Lexicon Quick-Define layer (next phase) tags any
+//  Swift identifier in the source block that has a Lexicon entry.
+//  ────────────────────────────────────────────────────────────────
 //
 
 import SwiftUI
 
 struct UnderTheHoodView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedFile: SourceFile?
+    @State private var selected: UnderTheHoodContent.FileEntry?
 
     var body: some View {
-        NavigationView {
-            List {
-                Section("Mission") {
-                    Text(DeveloperNotes.mission)
-                        .font(.body)
+        NavigationStack {
+            list
+                .navigationTitle("Under the Hood")
+                #if os(iOS) || os(visionOS)
+                .navigationBarTitleDisplayMode(.inline)
+                #endif
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { dismiss() }
+                    }
                 }
+        }
+    }
 
-                Section("Architecture") {
-                    Text(DeveloperNotes.architecture)
-                        .font(.body)
+    private var list: some View {
+        List {
+            Section {
+                Text("Each file in this app carries an Under the Hood callout — a developer-audience note explaining the design choice. Tap a row to read the callout, see the source, and jump to the live file on GitHub.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Developer Notes") {
+                NavigationLink("Mission") {
+                    DeveloperNotesPage(title: "Mission", text: DeveloperNotes.mission)
                 }
-
-                Section("Minimum Deployments") {
-                    Text(DeveloperNotes.minimumDeployments)
-                        .font(.body)
+                NavigationLink("Architecture") {
+                    DeveloperNotesPage(title: "Architecture", text: DeveloperNotes.architecture)
                 }
-
-                Section("Wrapped Destination") {
-                    Text(DeveloperNotes.wrappedDestination)
-                        .font(.body)
+                NavigationLink("Minimum Deployments") {
+                    DeveloperNotesPage(title: "Minimum Deployments", text: DeveloperNotes.minimumDeployments)
                 }
-
-                Section("Version History") {
-                    Text(DeveloperNotes.versionHistory)
-                        .font(.body)
+                NavigationLink("Wrapped Destination") {
+                    DeveloperNotesPage(title: "Wrapped Destination", text: DeveloperNotes.wrappedDestination)
                 }
+                NavigationLink("Version History") {
+                    DeveloperNotesPage(title: "Version History", text: DeveloperNotes.versionHistory)
+                }
+            }
 
-                Section("Source Files") {
-                    ForEach(SourceFile.allFiles) { file in
-                        Button {
-                            selectedFile = file
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(file.name)
-                                    .font(.system(.body, design: .monospaced))
+            Section("Source Files") {
+                ForEach(UnderTheHoodContent.entries) { entry in
+                    Button {
+                        selected = entry
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "swift")
+                                .foregroundStyle(.tint)
+                                .frame(width: 28)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(entry.filename)
+                                    .font(.body.monospaced())
                                     .foregroundStyle(.primary)
-                                Text(file.description)
-                                    .font(.callout)
+                                    .lineLimit(1)
+                                Text(entry.purpose)
+                                    .font(.footnote)
                                     .foregroundStyle(.secondary)
+                                    .lineLimit(1)
                             }
-                            .padding(.vertical, 2)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
-            .navigationTitle("Under the Hood")
-            #if os(iOS) || os(visionOS)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-            #else
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
-            #endif
-            .sheet(item: $selectedFile) { file in
-                SourceFileViewer(file: file)
-            }
         }
         #if os(iOS) || os(visionOS)
-        .navigationViewStyle(.stack)
+        .listStyle(.insetGrouped)
         #endif
+        .sheet(item: $selected) { entry in
+            FileDetailSheet(entry: entry)
+        }
     }
 }
 
-struct SourceFileViewer: View {
-    let file: SourceFile
-    @Environment(\.dismiss) private var dismiss
-    @State private var copied = false
+private struct DeveloperNotesPage: View {
+    let title: String
+    let text: String
 
     var body: some View {
-        NavigationView {
-            ScrollView([.horizontal, .vertical]) {
-                Text(file.source)
-                    .font(.system(.callout, design: .monospaced))
-                    .fixedSize(horizontal: true, vertical: false)
-                    .textSelection(.enabled)
+        ScrollView {
+            Text(text)
+                .font(.body)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .navigationTitle(title)
+        #if os(iOS) || os(visionOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+    }
+}
+
+private struct FileDetailSheet: View {
+    let entry: UnderTheHoodContent.FileEntry
+    @Environment(\.dismiss) private var dismiss
+    @State private var lexiconSelection: LexiconEntry?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(entry.filename)
+                            .font(.title3.monospaced())
+                        Text(entry.purpose)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Under the Hood", systemImage: "wrench.and.screwdriver")
+                            .font(.headline)
+                            .foregroundStyle(.tint)
+                        Text(entry.callout)
+                            .font(.body)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     .padding()
-            }
-            .navigationTitle(file.name)
-            #if os(iOS) || os(visionOS)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { dismiss() }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        copyToClipboard(file.source)
-                    } label: {
-                        Label(copied ? "Copied" : "Copy",
-                              systemImage: copied ? "checkmark" : "doc.on.doc")
+                    .background(calloutBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Source — tap any tinted identifier",
+                              systemImage: "swift")
+                            .font(.headline)
+                            .foregroundStyle(.tint)
+                        ScrollView(.horizontal, showsIndicators: true) {
+                            IdentifierTaggedSourceView(source: entry.source)
+                        }
+                        .frame(maxHeight: 400)
+                        .background(sourceBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+
+                    if let url = entry.githubURL {
+                        Link(destination: url) {
+                            Label("Open on GitHub", systemImage: "arrow.up.right.square")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
                     }
                 }
+                .padding()
             }
-            #else
+            .navigationTitle("Source File")
+            #if os(iOS) || os(visionOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        copyToClipboard(file.source)
-                    } label: {
-                        Label(copied ? "Copied" : "Copy",
-                              systemImage: copied ? "checkmark" : "doc.on.doc")
-                    }
-                }
             }
-            #endif
+            .environment(\.openURL, OpenURLAction { url in
+                if url.scheme == "lexicon",
+                   let host = url.host?.removingPercentEncoding,
+                   let lexicon = LexiconContent.entry(for: host) {
+                    lexiconSelection = lexicon
+                    return .handled
+                }
+                return .systemAction
+            })
+            .sheet(item: $lexiconSelection) { lex in
+                LexiconSheet(entry: lex)
+            }
         }
+    }
+
+    private var calloutBackground: Color {
         #if os(iOS) || os(visionOS)
-        .navigationViewStyle(.stack)
+        Color(.secondarySystemBackground)
+        #else
+        Color.secondary.opacity(0.1)
         #endif
     }
 
-    private func copyToClipboard(_ text: String) {
+    private var sourceBackground: Color {
         #if os(iOS) || os(visionOS)
-        UIPasteboard.general.string = text
-        #elseif os(macOS)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
+        Color(.tertiarySystemBackground)
+        #else
+        Color.secondary.opacity(0.05)
         #endif
-        copied = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            copied = false
-        }
     }
-}
-
-struct SourceFile: Identifiable {
-    let id = UUID()
-    let name: String
-    let description: String
-    let source: String
-
-    static let allFiles: [SourceFile] = [
-        SourceFile(
-            name: "Claudes_Web_WrapperApp.swift",
-            description: "App entry point — one WindowGroup, one ContentView",
-            source: """
-            import SwiftUI
-
-            @main
-            struct Claudes_Web_WrapperApp: App {
-                var body: some Scene {
-                    WindowGroup {
-                        ContentView()
-                    }
-                }
-            }
-            """
-        ),
-        SourceFile(
-            name: "ContentView.swift",
-            description: "Main wrapper — WKWebView + toolbar + info menu",
-            source: """
-            import SwiftUI
-            import WebKit
-
-            struct ContentView: View {
-                private let wikiURL = URL(string:
-                    "https://github.com/fluhartyml/Claudes-X26-Swift6-Bible/wiki")!
-
-                @State private var webView = WKWebView()
-                @State private var showAbout = false
-                @State private var showUnderTheHood = false
-
-                var body: some View {
-                    NavigationView {
-                        WebViewRepresentable(webView: webView)
-                            .ignoresSafeArea(edges: .bottom)
-                            .onAppear { webView.load(URLRequest(url: wikiURL)) }
-                            .toolbar { ... back/forward/reload/home + info menu ... }
-                    }
-                }
-            }
-            """
-        ),
-        SourceFile(
-            name: "WebViewRepresentable.swift",
-            description: "SwiftUI bridge for WKWebView — iOS and macOS",
-            source: """
-            import SwiftUI
-            import WebKit
-
-            #if os(iOS) || os(visionOS)
-            struct WebViewRepresentable: UIViewRepresentable {
-                let webView: WKWebView
-
-                func makeUIView(context: Context) -> WKWebView {
-                    webView.allowsBackForwardNavigationGestures = true
-                    return webView
-                }
-
-                func updateUIView(_ uiView: WKWebView, context: Context) {}
-            }
-            #elseif os(macOS)
-            struct WebViewRepresentable: NSViewRepresentable {
-                let webView: WKWebView
-
-                func makeNSView(context: Context) -> WKWebView {
-                    webView.allowsBackForwardNavigationGestures = true
-                    return webView
-                }
-
-                func updateNSView(_ nsView: WKWebView, context: Context) {}
-            }
-            #endif
-            """
-        ),
-        SourceFile(
-            name: "AboutView.swift",
-            description: "App info — icon, version, contact, feedback",
-            source: """
-            import SwiftUI
-
-            struct AboutView: View {
-                var body: some View {
-                    NavigationView {
-                        List {
-                            // App icon + version
-                            // Contact: author, fluharty.me, email
-                            // Credits: Engineered with Claude by Anthropic
-                            // Send Feedback button -> FeedbackView sheet
-                        }
-                        .navigationTitle("About")
-                    }
-                }
-            }
-            """
-        ),
-        SourceFile(
-            name: "UnderTheHoodView.swift",
-            description: "This view — mission, architecture, every source file",
-            source: """
-            import SwiftUI
-
-            struct UnderTheHoodView: View {
-                var body: some View {
-                    NavigationView {
-                        List {
-                            // Mission, Architecture, Deployments, Destination,
-                            // Version History (from DeveloperNotes)
-                            // Source Files list -> SourceFileViewer sheet
-                        }
-                        .navigationTitle("Under the Hood")
-                    }
-                }
-            }
-            """
-        ),
-        SourceFile(
-            name: "FeedbackView.swift",
-            description: "Bug report / feature request email form",
-            source: """
-            import SwiftUI
-            import MessageUI
-
-            struct FeedbackView: View {
-                var body: some View {
-                    Form {
-                        Picker("Type", selection: $feedbackType) { ... }
-                        Section("Your Feedback") {
-                            TextEditor(text: $feedbackText)
-                        }
-                        Button("Send") {
-                            // MFMailComposeViewController on iOS,
-                            // mailto: URL on macOS fallback
-                        }
-                    }
-                }
-            }
-            """
-        ),
-        SourceFile(
-            name: "DeveloperNotes.swift",
-            description: "Canonical reference — mirrors wiki Developer-Notes.md",
-            source: """
-            enum DeveloperNotes {
-                static let mission = "..."
-                static let architecture = "..."
-                static let minimumDeployments = "..."
-                static let wrappedDestination = "..."
-                static let versionHistory = "..."
-            }
-            """
-        ),
-    ]
 }
 
 #Preview {
